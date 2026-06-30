@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partner Success Overview</title>
+<style>
+  :root {
+    --bg: #fafaf8;
+    --surface: #ffffff;
+    --border: #e4e2dc;
+    --border-strong: #cdcac1;
+    --text-primary: #1a1a18;
+    --text-secondary: #6b6960;
+    --text-muted: #95928a;
+    --green-bg: #e7f3ea;
+    --green-text: #1e7a3c;
+    --amber-bg: #fdf3e0;
+    --amber-text: #9a6400;
+    --red-bg: #fbe9e7;
+    --red-text: #b13a2e;
+    --blue-bg: #e8f0f5;
+    --blue-text: #2c5f7c;
+    --gray-bg: #f1f0ec;
+    --gray-text: #6b6960;
+    --accent: #2c5f7c;
+    --radius: 10px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    padding: 0 0 4rem;
+  }
+  .wrap { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+  header.page-head {
+    border-bottom: 1px solid var(--border);
+    padding: 28px 0 22px;
+    margin-bottom: 32px;
+  }
+  header.page-head .row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px;
+  }
+  header.page-head h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  header.page-head .meta { font-size: 13px; color: var(--text-muted); }
+  header.page-head .sub { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 36px;
+  }
+  .kpi {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px 20px; cursor: pointer; transition: border-color 0.12s ease;
+  }
+  .kpi:hover { border-color: var(--border-strong); }
+  .kpi .label {
+    font-size: 12.5px; color: var(--text-secondary); text-transform: uppercase;
+    letter-spacing: 0.04em; margin-bottom: 8px;
+  }
+  .kpi .value { font-size: 30px; font-weight: 600; letter-spacing: -0.01em; }
+  .kpi .value.warning { color: var(--amber-text); }
+  .kpi .value.danger { color: var(--red-text); }
+  section { margin-bottom: 40px; }
+  section > h2 {
+    font-size: 15px; font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+  }
+  section > h2 .count { font-weight: 400; color: var(--text-muted); font-size: 13px; }
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px; }
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .chart-card h3 { font-size: 13.5px; font-weight: 600; margin-bottom: 14px; color: var(--text-primary); }
+  .chart-wrap { position: relative; width: 100%; height: 200px; }
+  .legend-row { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: var(--text-secondary); }
+  .legend-row span.dot {
+    display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 5px; vertical-align: -1px;
+  }
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .filter-btn {
+    font-family: inherit; font-size: 12.5px; padding: 6px 13px; border-radius: 999px;
+    border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-secondary);
+    cursor: pointer; transition: all 0.12s ease;
+  }
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: var(--text-primary); border-color: var(--text-primary); color: #fff; }
+  .partner-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px 18px; display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; margin-bottom: 10px; flex-wrap: wrap; cursor: pointer;
+    transition: border-color 0.12s ease, box-shadow 0.12s ease;
+  }
+  .partner-card:hover { border-color: var(--border-strong); box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+  .partner-card .left { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1 1 280px; }
+  .risk-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .partner-card .name { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .partner-card .name .chev { font-size: 12px; color: var(--text-muted); }
+  .partner-card .milestone { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+  .partner-card .right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+  .partner-card .agent-stat { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+  .status-pill { font-size: 12.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px; white-space: nowrap; }
+  .status-pill.on-track { background: var(--green-bg); color: var(--green-text); }
+  .status-pill.at-risk { background: var(--amber-bg); color: var(--amber-text); }
+  .risk-pill {
+    font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 6px;
+    text-transform: uppercase; letter-spacing: 0.03em;
+  }
+  .risk-pill.low { background: var(--green-bg); color: var(--green-text); }
+  .risk-pill.medium { background: var(--amber-bg); color: var(--amber-text); }
+  .risk-pill.high { background: var(--red-bg); color: var(--red-text); }
+  table.action-table {
+    width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; font-size: 13.5px;
+  }
+  table.action-table th {
+    text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--text-muted); font-weight: 600; padding: 10px 16px; border-bottom: 1px solid var(--border);
+    background: #f7f6f3;
+  }
+  table.action-table td { padding: 11px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.action-table tr:last-child td { border-bottom: none; }
+  table.action-table tbody tr { cursor: pointer; transition: background 0.1s ease; }
+  table.action-table tbody tr:hover td { background: #f5f4f0; }
+  .partner-tag {
+    font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 6px;
+    background: var(--red-bg); color: var(--red-text); white-space: nowrap;
+  }
+  td.col-priority { white-space: nowrap; }
+  .priority-pill { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 6px; }
+  .priority-pill.high { background: var(--red-bg); color: var(--red-text); }
+  .priority-pill.medium { background: var(--amber-bg); color: var(--amber-text); }
+  .priority-pill.low { background: var(--green-bg); color: var(--green-text); }
+  footer.note {
+    margin-top: 36px; font-size: 12.5px; color: var(--text-muted);
+    border-top: 1px solid var(--border); padding-top: 16px;
+  }
+  .overlay {
+    position: fixed; inset: 0; background: rgba(20, 19, 16, 0.42); display: none;
+    align-items: flex-start; justify-content: center; padding: 48px 20px; overflow-y: auto; z-index: 50;
+  }
+  .overlay.open { display: flex; }
+  .panel {
+    background: var(--surface); border-radius: 14px; width: 100%; max-width: 720px;
+    max-height: calc(100vh - 96px); overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+  }
+  .panel-head {
+    padding: 22px 26px 18px; border-bottom: 1px solid var(--border); display: flex;
+    align-items: flex-start; justify-content: space-between; gap: 12px; position: sticky; top: 0;
+    background: var(--surface); border-radius: 14px 14px 0 0;
+  }
+  .panel-head h2 { font-size: 19px; font-weight: 600; margin-bottom: 4px; }
+  .panel-head .sub { font-size: 13px; color: var(--text-secondary); }
+  .panel-close {
+    border: none; background: var(--gray-bg); color: var(--text-secondary); width: 30px; height: 30px;
+    border-radius: 50%; font-size: 16px; cursor: pointer; flex-shrink: 0; line-height: 1;
+  }
+  .panel-close:hover { background: var(--border-strong); color: var(--text-primary); }
+  .panel-body { padding: 20px 26px 26px; }
+  .panel-stats { display: flex; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; }
+  .panel-stat { background: var(--gray-bg); border-radius: 8px; padding: 9px 14px; font-size: 12.5px; color: var(--text-secondary); }
+  .panel-stat b { color: var(--text-primary); font-weight: 600; }
+  .ws-block { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+  .ws-block .ws-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+  .ws-block .ws-name { font-size: 14.5px; font-weight: 600; }
+  .ws-status-pill { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 6px; white-space: nowrap; }
+  .ws-status-pill.live { background: var(--green-bg); color: var(--green-text); }
+  .ws-status-pill.inbuild { background: var(--blue-bg); color: var(--blue-text); }
+  .ws-status-pill.blocked { background: var(--red-bg); color: var(--red-text); }
+  .ws-status-pill.waiting { background: var(--amber-bg); color: var(--amber-text); }
+  .ws-status-pill.notstarted { background: var(--gray-bg); color: var(--gray-text); }
+  .ws-status-pill.poc { background: var(--blue-bg); color: var(--blue-text); }
+  .ws-status-pill.planned { background: var(--gray-bg); color: var(--gray-text); }
+  .ws-row { display: grid; grid-template-columns: 110px 1fr; gap: 4px 10px; font-size: 13px; margin-top: 4px; }
+  .ws-row .k { color: var(--text-muted); }
+  .ws-row .v { color: var(--text-primary); }
+  .ws-row .v.blocker { color: var(--red-text); }
+  .ai-item { border: 1px solid var(--border); border-radius: 10px; padding: 13px 16px; margin-bottom: 10px; }
+  .ai-item .ai-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+  .ai-item .ai-title { font-size: 14px; font-weight: 600; }
+  .ai-item .ai-notes { font-size: 13px; color: var(--text-secondary); background: var(--gray-bg); border-radius: 6px; padding: 8px 10px; }
+  @media (max-width: 860px) {
+    .kpi-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .charts-row { grid-template-columns: 1fr; }
+    table.action-table { font-size: 12.5px; }
+    table.action-table th:nth-child(4), table.action-table td:nth-child(4) { display: none; }
+    .ws-row { grid-template-columns: 95px 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="page-head">
+    <div class="row">
+      <h1>Partner success overview</h1>
+      <span class="meta">Last updated June 30, 2026</span>
+    </div>
+    <p class="sub">CollegeVine &middot; Partner Success &middot; AI agent &amp; chatbot accounts</p>
+  </header>
+
+  <div class="kpi-grid">
+    <div class="kpi" id="kpi-partners">
+      <div class="label">Partners</div>
+      <div class="value">5</div>
+    </div>
+    <div class="kpi" id="kpi-risk">
+      <div class="label">At risk</div>
+      <div class="value warning">3</div>
+    </div>
+    <div class="kpi" id="kpi-live">
+      <div class="label">Agents live</div>
+      <div class="value">2</div>
+    </div>
+    <div class="kpi" id="kpi-actions">
+      <div class="label">High priority actions</div>
+      <div class="value danger">14</div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <h3>Renewal risk by partner</h3>
+      <div class="chart-wrap">
+        <canvas id="riskChart" role="img" aria-label="Bar chart of renewal risk by partner. Click a bar to see that partner's detail. Barry medium, Roosevelt low, Tufts high, Nevada high, UCSD high">Barry: Medium, Roosevelt: Low, Tufts: High, Nevada: High, UCSD: High</canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Agents live vs. in build</h3>
+      <div class="chart-wrap">
+        <canvas id="agentsChart" role="img" aria-label="Stacked bar chart comparing agents live versus agents in build for each partner. Click a bar to see that partner's detail">Barry: 1 live, 1 in build. Roosevelt: 1 live, 6 in build. Tufts: 0 live, 1 in build. Nevada: 0 live, 4 in build. UCSD: 0 live, 3 in build.</canvas>
+      </div>
+      <div class="legend-row">
+        <span><span class="dot" style="background:#2fa84f;"></span>Live</span>
+        <span><span class="dot" style="background:#b3b0a6;"></span>In build</span>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <h2>Partner detail <span class="count" id="partner-count"></span></h2>
+    <p style="font-size:13px;color:var(--text-muted);margin:-6px 0 14px;">Click any partner to see full workstreams, blockers, and next steps.</p>
+    <div id="partnerCards"></div>
+  </section>
+
+  <section>
+    <h2>Open action items <span class="count" id="action-count"></span></h2>
+    <div class="filter-row" id="filters"></div>
+    <table class="action-table">
+      <thead>
+        <tr>
+          <th>Partner</th>
+          <th>Action item</th>
+          <th>Owner</th>
+          <th>Due</th>
+          <th>Priority</th>
+        </tr>
+      </thead>
+      <tbody id="actionsBody"></tbody>
+    </table>
+    <p style="font-size:12.5px;color:var(--text-muted);margin-top:10px;">Click a row to see the full context and notes.</p>
+  </section>
+
+  <footer class="note">
+    Snapshot reflects the partner tracker as of June 30, 2026. Regenerate this page from the underlying sheet to refresh.
+  </footer>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="panel" id="panel"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const partners = [
+  {
+    name: 'Barry', risk: 'Medium', live: 1, build: 1,
+    milestone: 'Degree Audit delivery — due 2026-06-30', status: 'On Track',
+    workstreams: [
+      { name: 'Degree Audit', lead: 'Jessica / Bennett', status: 'In Build - QA', statusClass: 'inbuild', deliverable: 'Full operational degree audit', due: '2026-06-30', blocker: 'None current', cvAction: 'Complete QA + finalize UI', partnerAction: 'Review after delivery' },
+      { name: 'Adrian (AIOS)', lead: 'Jessica / Bennett', status: 'Live', statusClass: 'live', deliverable: 'Expand team usage + proactive outreach', due: 'Ongoing', blocker: 'SFTP Interaction ID pending Lola', cvAction: 'Run AIOS broader team session', partnerAction: 'Respond on Interaction ID path' },
+      { name: 'SFTP / Interaction ID', lead: 'Jessica', status: 'Waiting on Partner', statusClass: 'waiting', deliverable: 'Agree on Interaction ID approach', due: 'TBD', blocker: 'Waiting on Lola to confirm', cvAction: 'Sent options 6/26', partnerAction: 'Lola to confirm timestamp vs. LLM' },
+      { name: 'Authenticated Access', lead: 'Jessica / Bennett', status: 'Not Started', statusClass: 'notstarted', deliverable: 'Document path forward', due: '2026-12-28', blocker: 'Waiting on SFTP egress resolution', cvAction: 'TBD after SFTP resolved', partnerAction: 'TBD' },
+      { name: 'Course Schedule Optimization', lead: 'TBD', status: 'Planned', statusClass: 'planned', deliverable: 'TBD', due: 'Post-August 2026', blocker: 'TBD', cvAction: 'Plan at Vineyard (Aug)', partnerAction: 'TBD' },
+    ]
+  },
+  {
+    name: 'Roosevelt', risk: 'Low', live: 1, build: 6,
+    milestone: 'Credit consumption call — due 2026-06-30', status: 'On Track',
+    workstreams: [
+      { name: 'FinAid Email Helpdesk', lead: 'EJ / Mohit', status: 'Live', statusClass: 'live', deliverable: 'Ongoing', due: 'Ongoing', blocker: 'None', cvAction: 'Monitor', partnerAction: '-' },
+      { name: 'AIOS', lead: 'Jason', status: 'In Build', statusClass: 'inbuild', deliverable: 'Go-live', due: '2026-07-15', blocker: 'Aaron webchat questions unresolved', cvAction: 'Resolve webchat + latency', partnerAction: 'Aaron to confirm behavior examples' },
+      { name: 'Grad Audit', lead: 'EJ / Bennett / Mohit', status: 'In Build', statusClass: 'inbuild', deliverable: 'Full grad audit delivery', due: '2026-07-31', blocker: 'None current', cvAction: 'Confirm next steps from 6/25 kickoff', partnerAction: 'Data validation' },
+      { name: 'IT Helpdesk', lead: 'Mohit / EJ', status: 'Status TBC', statusClass: 'notstarted', deliverable: 'Go-live confirmation', due: '2026-06-22', blocker: 'Status unconfirmed since June 22', cvAction: 'Confirm live status', partnerAction: '-' },
+      { name: 'SEP Agent', lead: 'Mohit', status: 'POC', statusClass: 'poc', deliverable: 'POC review with team', due: '2026-06-30', blocker: 'None', cvAction: 'Schedule POC review', partnerAction: '-' },
+      { name: 'Transfer Pathway', lead: 'Mohit', status: 'POC', statusClass: 'poc', deliverable: 'Share progress update', due: '2026-07-01', blocker: 'None', cvAction: 'Share update early this week', partnerAction: '-' },
+      { name: 'Athletics Compliance', lead: 'Mohit', status: 'POC', statusClass: 'poc', deliverable: 'POC delivery', due: '2026-08-05', blocker: 'None', cvAction: 'Build POC', partnerAction: '-' },
+      { name: 'TCE', lead: 'Mohit / EJ', status: 'POC', statusClass: 'poc', deliverable: 'TBD', due: 'TBD', blocker: 'TBD', cvAction: 'TBD', partnerAction: '-' },
+      { name: 'Billing Agent', lead: 'Jake', status: 'Not Started', statusClass: 'notstarted', deliverable: 'Intro call with Neeraj', due: 'TBD', blocker: 'No call scheduled since June 9', cvAction: 'Schedule intro call', partnerAction: '-' },
+      { name: 'Credit / Contract', lead: 'Jake / Bryant', status: 'In Progress', statusClass: 'inbuild', deliverable: 'Contract amendment + credit breakdown', due: '2026-06-30', blocker: 'Bryant needs credit breakdown doc', cvAction: 'Bryant to prepare breakdown', partnerAction: '-' },
+    ]
+  },
+  {
+    name: 'Nevada', risk: 'High', live: 0, build: 4,
+    milestone: 'Procurement agent go-live — due TBD', status: 'At Risk',
+    workstreams: [
+      { name: 'Awareness Agent', lead: 'Bennett / Tanvi', status: 'Blocked', statusClass: 'blocked', deliverable: 'Fix context window + Exa API upgrade', due: 'TBD', blocker: 'IT approval for Exa API pending', cvAction: 'Fix context window bug', partnerAction: 'IT to approve Exa API' },
+      { name: 'Procurement Agent', lead: 'TBD', status: 'Near Ready', statusClass: 'inbuild', deliverable: 'Go-live', due: 'TBD', blocker: 'No CV owner assigned', cvAction: 'Confirm owner + set go-live date', partnerAction: 'Appoint UNR-side owner' },
+      { name: 'Course Scheduling', lead: 'Bennett / Tanvi', status: 'In Build', statusClass: 'inbuild', deliverable: 'Internally-facing use case pivot', due: 'TBD', blocker: 'Use case pivot scope needed', cvAction: 'Define pivot scope', partnerAction: 'Confirm internal use case requirements' },
+      { name: 'AIOS', lead: 'Jason', status: 'In Build', statusClass: 'inbuild', deliverable: 'Launch for incoming class (Fall)', due: '2026-09-01', blocker: 'No to-do with Dr. Speed', cvAction: 'Agree to-do list with Dr. Speed', partnerAction: 'Dr. Speed to confirm requirements' },
+      { name: 'Grad Expansion', lead: 'Aine', status: 'Discovery', statusClass: 'planned', deliverable: 'Intro to Markus Kemmelmeier', due: 'TBD', blocker: 'None', cvAction: 'Raise with Vince + get intro to Markus', partnerAction: 'Vince to intro Markus' },
+    ]
+  },
+  {
+    name: 'UCSD', risk: 'High', live: 0, build: 3,
+    milestone: 'Triton July 1 go-live — due 2026-07-01', status: 'At Risk',
+    workstreams: [
+      { name: 'Triton (Phone + Document Status)', lead: 'Anusha / Bennett', status: 'In Build - Testing', statusClass: 'inbuild', deliverable: 'July 1 launch (general agent)', due: '2026-07-01', blocker: 'Stefan low test engagement; awaiting approach confirmation', cvAction: 'Update prompt; confirm plan with Stefan', partnerAction: 'Confirm single-agent approach + provide student language' },
+      { name: 'Cash (Outbound Financial Aid)', lead: 'Anusha', status: 'Planned', statusClass: 'planned', deliverable: 'Deployment plan TBD', due: 'TBD', blocker: 'No deployment timeline defined post-6/1 call', cvAction: 'Define deployment plan', partnerAction: 'TBD' },
+      { name: 'Application Insights (Custom Agent)', lead: 'Anusha / Bennett', status: 'In Build', statusClass: 'inbuild', deliverable: 'Delivery by end of August', due: '2026-08-31', blocker: 'No Slack visibility post-kickoff 6/2', cvAction: 'Confirm status with Anusha', partnerAction: 'TBD' },
+    ]
+  },
+  {
+    name: 'Tufts', risk: 'High', live: 0, build: 1,
+    milestone: 'AIOS chatbot launch — due 2026-07-15', status: 'At Risk',
+    workstreams: [
+      { name: 'AIOS / OneStop (Chatbot)', lead: 'Bharg / Chelsea', status: 'In Build - Testing', statusClass: 'inbuild', deliverable: 'Mid-July launch', due: '2026-07-15', blocker: 'JoAnn bandwidth; partner slow to respond', cvAction: 'Schedule virtual sessions week of July 6', partnerAction: 'Confirm virtual session dates' },
+      { name: 'AIOS Email + Phone', lead: 'Bharg / Chelsea', status: 'Planned', statusClass: 'planned', deliverable: 'Early August launch', due: '2026-08-01', blocker: 'Gated on chatbot launch first', cvAction: 'Set up after chatbot launches', partnerAction: 'Complete chatbot testing first' },
+      { name: 'AIR Offboarding ($144k 9/1)', lead: 'Bharg', status: 'In Progress', statusClass: 'inbuild', deliverable: 'Complete offboarding', due: '2026-07-15', blocker: 'None', cvAction: 'IM-Ops tagged for next steps', partnerAction: 'TBD' },
+      { name: 'AIR Winback Exploration', lead: 'Johan', status: 'Not Started', statusClass: 'notstarted', deliverable: 'Intro call with Michael', due: 'TBD', blocker: 'Not yet scheduled', cvAction: 'Schedule call with Michael', partnerAction: 'TBD' },
+    ]
+  },
+];
+
+const actions = [
+  { partner: 'Barry', item: 'Degree Audit delivery', owner: 'Jessica / Bennett', due: '2026-06-30', priority: 'High', status: 'In Progress', notes: 'On track per Jessica 6/29.' },
+  { partner: 'Barry', item: 'AIOS broader team session', owner: 'Jessica', due: '2026-06-29', priority: 'High', status: 'In Progress', notes: 'Materials prepped; Jessica leading afternoon session.' },
+  { partner: 'Barry', item: 'Interaction ID response from Lola', owner: 'Jessica', due: 'TBD', priority: 'Medium', status: 'Waiting on Partner', notes: 'Sent options 6/26 (timestamp vs. LLM inference).' },
+  { partner: 'Barry', item: 'Post-delivery QA + operational dashboard plan', owner: 'Jessica / Bennett', due: 'TBD', priority: 'Medium', status: 'Not Started', notes: 'Kicks off after Tuesday delivery.' },
+  { partner: 'Barry', item: 'Sonya 1:1 with Yvette', owner: 'Sonya', due: 'TBD', priority: 'Low', status: 'Unconfirmed', notes: 'Flagged as priority May 26; no confirmation.' },
+  { partner: 'Roosevelt', item: 'Credit consumption call', owner: 'Jake / Bryant', due: '2026-06-30', priority: 'High', status: 'In Progress', notes: 'Bryant to prep breakdown; call at 12:15pm.' },
+  { partner: 'Roosevelt', item: 'AIOS webchat answer for Aaron', owner: 'Jake / Fia', due: 'TBD', priority: 'High', status: 'In Progress', notes: 'Waiting on expanded chat answer to communicate both issues at once.' },
+  { partner: 'Roosevelt', item: 'Grad audit next steps', owner: 'EJ / Mohit', due: 'This week', priority: 'Medium', status: 'Pending', notes: 'Kickoff happened 6/25; need post-meeting actions confirmed.' },
+  { partner: 'Roosevelt', item: 'SEP POC review scheduling', owner: 'Mohit', due: 'This week', priority: 'Medium', status: 'Pending', notes: 'Mohit noted POC nearly done as of 6/26.' },
+  { partner: 'Roosevelt', item: 'Transfer Pathway update', owner: 'Mohit', due: '2026-07-01', priority: 'Medium', status: 'In Progress', notes: 'Working on it over the weekend per 6/26.' },
+  { partner: 'Roosevelt', item: 'Sub-domain schedule-send to Vincent', owner: 'EJ', due: '2026-07-06', priority: 'Medium', status: 'Pending', notes: 'Vincent OOO until July 6.' },
+  { partner: 'Roosevelt', item: 'IT Helpdesk status confirm', owner: 'Mohit / EJ', due: 'This week', priority: 'Medium', status: 'Pending', notes: 'June 22 target not confirmed in Slack.' },
+  { partner: 'Roosevelt', item: 'Student SSO testing', owner: 'Adrian', due: 'This week', priority: 'Low', status: 'Ready', notes: 'Adrian confirmed constituent SSO good to go.' },
+  { partner: 'Roosevelt', item: 'Billing agent intro scheduling', owner: 'Jake', due: 'TBD', priority: 'Low', status: 'Pending', notes: 'Neeraj asked June 9; no scheduling visible.' },
+  { partner: 'Nevada', item: 'Awareness agent context window fix', owner: 'Bennett', due: 'This week', priority: 'High', status: 'In Progress', notes: 'Bennett fixing as of 6/26.' },
+  { partner: 'Nevada', item: 'IT approval for Exa API', owner: 'Bennett', due: 'TBD', priority: 'High', status: 'Waiting on IT', notes: 'Waiting on IT since 6/25.' },
+  { partner: 'Nevada', item: 'Procurement agent go-live plan', owner: 'TBD', due: 'This week', priority: 'High', status: 'Not Started', notes: 'Fastest path to tangible win before renewal.' },
+  { partner: 'Nevada', item: 'Course scheduling pivot scope', owner: 'Bennett / Tanvi', due: 'This week', priority: 'Medium', status: 'Not Started', notes: 'Use case pivot to internally-facing needed.' },
+  { partner: 'Nevada', item: 'AIOS to-do list with Dr. Speed', owner: 'Jason', due: 'This week', priority: 'High', status: 'Pending', notes: 'Jason OOO Monday; back Tuesday.' },
+  { partner: 'Nevada', item: 'Grad expansion intro', owner: 'Aine', due: 'This week', priority: 'Medium', status: 'In Progress', notes: 'Contact: markusk@unr.edu.' },
+  { partner: 'Nevada', item: 'Vince weekly agenda', owner: 'Aine', due: 'This week', priority: 'Medium', status: 'Not Started', notes: 'Weekly invite sent; standing agenda needed.' },
+  { partner: 'Nevada', item: 'UNR-side agent owner appointments', owner: 'Vince', due: 'This week', priority: 'High', status: 'Waiting on Partner', notes: 'Vince committed 6/26; not confirmed yet.' },
+  { partner: 'UCSD', item: 'Triton July 1 go-live', owner: 'Fia / Bennett', due: '2026-07-01', priority: 'High', status: 'In Progress', notes: 'Email sent to Stefan 6/29; awaiting confirmation of approach.' },
+  { partner: 'UCSD', item: 'Stefan: confirm single-agent approach + student language', owner: 'Fia / Anusha', due: '2026-07-01', priority: 'High', status: 'In Progress', notes: 'Stefan got spooked about two-number approach; email sent 6/29.' },
+  { partner: 'UCSD', item: 'Application Insights status check', owner: 'Anusha', due: 'This week', priority: 'High', status: 'Pending', notes: 'No Slack visibility post-kickoff 6/2; needs confirmation.' },
+  { partner: 'UCSD', item: 'Jim check-in milestone post-launch', owner: 'Johan', due: 'After 7/1 launch', priority: 'Medium', status: 'Not Started', notes: 'Johan flagged this as a deliberate milestone.' },
+  { partner: 'Tufts', item: 'AIOS virtual sessions scheduling (3 groups + admin demo)', owner: 'Fia / Bharg', due: 'Week of July 6', priority: 'High', status: 'In Progress', notes: 'Email sent to partner 6/29; awaiting response.' },
+  { partner: 'Tufts', item: 'AIOS escalation pathways confirmation', owner: 'Bharg', due: 'This week', priority: 'Medium', status: 'Pending', notes: 'Chelsea flagged as outstanding 6/23.' },
+  { partner: 'Tufts', item: 'AIR offboarding completion', owner: 'Bharg / IM-Ops', due: '2026-07-15', priority: 'Medium', status: 'In Progress', notes: 'Bharg tagged deal closed lost 6/25; IM-Ops handling next steps.' },
+  { partner: 'Tufts', item: 'Johan / Michael call (AIR feedback + winback)', owner: 'Johan', due: 'TBD', priority: 'Medium', status: 'Not Started', notes: 'Not yet scheduled.' },
+];
+
+const riskHex = { Low: '#2fa84f', Medium: '#e0a514', High: '#d6493b' };
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderKpiCounts() {
+  document.getElementById('partner-count').textContent = `(${partners.length})`;
+}
+
+function openOverlay(html) {
+  document.getElementById('panel').innerHTML = html;
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeOverlay() {
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('overlay').addEventListener('click', e => {
+  if (e.target.id === 'overlay') closeOverlay();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOverlay(); });
+
+function openPartnerDetail(name) {
+  const p = partners.find(x => x.name === name);
+  const wsHtml = p.workstreams.map(w => `
+    <div class="ws-block">
+      <div class="ws-head">
+        <span class="ws-name">${escapeHtml(w.name)}</span>
+        <span class="ws-status-pill ${w.statusClass}">${escapeHtml(w.status)}</span>
+      </div>
+      <div class="ws-row"><span class="k">Lead</span><span class="v">${escapeHtml(w.lead)}</span></div>
+      <div class="ws-row"><span class="k">Deliverable</span><span class="v">${escapeHtml(w.deliverable)}</span></div>
+      <div class="ws-row"><span class="k">Due</span><span class="v">${escapeHtml(w.due)}</span></div>
+      <div class="ws-row"><span class="k">Blocker</span><span class="v blocker">${escapeHtml(w.blocker)}</span></div>
+      <div class="ws-row"><span class="k">CV action</span><span class="v">${escapeHtml(w.cvAction)}</span></div>
+      <div class="ws-row"><span class="k">Partner action</span><span class="v">${escapeHtml(w.partnerAction)}</span></div>
+    </div>
+  `).join('');
+
+  openOverlay(`
+    <div class="panel-head">
+      <div>
+        <h2>${escapeHtml(p.name)}</h2>
+        <div class="sub">${escapeHtml(p.milestone)}</div>
+      </div>
+      <button class="panel-close" onclick="closeOverlay()" aria-label="Close">&times;</button>
+    </div>
+    <div class="panel-body">
+      <div class="panel-stats">
+        <span class="panel-stat">Renewal risk: <b>${escapeHtml(p.risk)}</b></span>
+        <span class="panel-stat">Overall status: <b>${escapeHtml(p.status)}</b></span>
+        <span class="panel-stat">Agents live: <b>${p.live}</b></span>
+        <span class="panel-stat">Agents in build: <b>${p.build}</b></span>
+        <span class="panel-stat">Workstreams: <b>${p.workstreams.length}</b></span>
+      </div>
+      ${wsHtml}
+    </div>
+  `);
+}
+
+function openActionDetail(idx) {
+  const a = actions[idx];
+  openOverlay(`
+    <div class="panel-head">
+      <div>
+        <h2>${escapeHtml(a.item)}</h2>
+        <div class="sub">${escapeHtml(a.partner)} &middot; owned by ${escapeHtml(a.owner)}</div>
+      </div>
+      <button class="panel-close" onclick="closeOverlay()" aria-label="Close">&times;</button>
+    </div>
+    <div class="panel-body">
+      <div class="panel-stats">
+        <span class="panel-stat">Status: <b>${escapeHtml(a.status)}</b></span>
+        <span class="panel-stat">Priority: <b>${escapeHtml(a.priority)}</b></span>
+        <span class="panel-stat">Due: <b>${escapeHtml(a.due)}</b></span>
+      </div>
+      <div class="ai-item">
+        <div class="ai-head"><span class="ai-title">Notes</span></div>
+        <div class="ai-notes">${escapeHtml(a.notes)}</div>
+      </div>
+      <button class="filter-btn" style="margin-top:6px;" onclick="closeOverlay(); openPartnerDetail('${escapeHtml(a.partner)}')">View ${escapeHtml(a.partner)} full context &rarr;</button>
+    </div>
+  `);
+}
+
+function renderPartnerCards() {
+  const el = document.getElementById('partnerCards');
+  el.innerHTML = '';
+  partners.forEach(p => {
+    const statusClass = p.status === 'On Track' ? 'on-track' : 'at-risk';
+    const card = document.createElement('div');
+    card.className = 'partner-card';
+    card.innerHTML = `
+      <div class="left">
+        <span class="risk-dot" style="background:${riskHex[p.risk]};"></span>
+        <div>
+          <div class="name">${escapeHtml(p.name)} <span class="chev">&rsaquo;</span></div>
+          <div class="milestone">${escapeHtml(p.milestone)}</div>
+        </div>
+      </div>
+      <div class="right">
+        <span class="risk-pill ${p.risk.toLowerCase()}">${escapeHtml(p.risk)} risk</span>
+        <span class="agent-stat">${p.live} live / ${p.build} building</span>
+        <span class="status-pill ${statusClass}">${escapeHtml(p.status)}</span>
+      </div>
+    `;
+    card.addEventListener('click', () => openPartnerDetail(p.name));
+    el.appendChild(card);
+  });
+}
+
+let activeFilter = 'High';
+
+function renderFilters() {
+  const el = document.getElementById('filters');
+  const opts = ['High', 'Medium', 'All'];
+  el.innerHTML = '';
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn' + (activeFilter === opt ? ' active' : '');
+    btn.textContent = opt === 'All' ? 'All priorities' : opt + ' priority';
+    btn.onclick = () => { activeFilter = opt; renderFilters(); renderActions(); };
+    el.appendChild(btn);
+  });
+}
+
+function renderActions() {
+  const body = document.getElementById('actionsBody');
+  const filtered = actions
+    .map((a, i) => ({ ...a, idx: i }))
+    .filter(a => activeFilter === 'All' || a.priority === activeFilter);
+  document.getElementById('action-count').textContent = `(${filtered.length} of ${actions.length})`;
+  body.innerHTML = '';
+  filtered.forEach(a => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="partner-tag">${escapeHtml(a.partner)}</span></td>
+      <td>${escapeHtml(a.item)}</td>
+      <td>${escapeHtml(a.owner)}</td>
+      <td>${escapeHtml(a.due)}</td>
+      <td class="col-priority"><span class="priority-pill ${a.priority.toLowerCase()}">${escapeHtml(a.priority)}</span></td>
+    `;
+    tr.addEventListener('click', () => openActionDetail(a.idx));
+    body.appendChild(tr);
+  });
+}
+
+renderKpiCounts();
+renderPartnerCards();
+renderFilters();
+renderActions();
+
+document.getElementById('kpi-risk').addEventListener('click', () => {
+  document.querySelector('#partnerCards').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+document.getElementById('kpi-actions').addEventListener('click', () => {
+  activeFilter = 'High';
+  renderFilters();
+  renderActions();
+  document.querySelector('.action-table').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+const riskMap = { Low: 1, Medium: 2, High: 3 };
+new Chart(document.getElementById('riskChart'), {
+  type: 'bar',
+  data: {
+    labels: partners.map(p => p.name),
+    datasets: [{
+      data: partners.map(p => riskMap[p.risk]),
+      backgroundColor: partners.map(p => riskHex[p.risk]),
+      borderRadius: 4,
+      maxBarThickness: 36
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    onClick: (evt, elements) => { if (elements.length) openPartnerDetail(partners[elements[0].index].name); },
+    onHover: (evt, elements) => { evt.native.target.style.cursor = elements.length ? 'pointer' : 'default'; },
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => partners[ctx.dataIndex].risk + ' risk — click for detail' } }
+    },
+    scales: {
+      y: { display: false, max: 3.5 },
+      x: { grid: { display: false }, ticks: { color: '#95928a', font: { size: 12 } } }
+    }
+  }
+});
+
+new Chart(document.getElementById('agentsChart'), {
+  type: 'bar',
+  data: {
+    labels: partners.map(p => p.name),
+    datasets: [
+      { label: 'Live', data: partners.map(p => p.live), backgroundColor: '#2fa84f', borderRadius: 4, maxBarThickness: 36 },
+      { label: 'In build', data: partners.map(p => p.build), backgroundColor: '#b3b0a6', borderRadius: 4, maxBarThickness: 36 }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    onClick: (evt, elements) => { if (elements.length) openPartnerDetail(partners[elements[0].index].name); },
+    onHover: (evt, elements) => { evt.native.target.style.cursor = elements.length ? 'pointer' : 'default'; },
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { stacked: true, grid: { display: false }, ticks: { color: '#95928a', font: { size: 12 } } },
+      y: { stacked: true, grid: { color: '#ece9e2' }, ticks: { color: '#95928a', font: { size: 11 }, stepSize: 1 } }
+    }
+  }
+});
+</script>
+
+</body>
+</html>
